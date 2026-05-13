@@ -1823,15 +1823,33 @@ function addMarker(shop) {
 function selectShop(id) {
   if (activeId !== null && markers[activeId]) {
     const prev = SHOPS.find(s => s.id === activeId);
-    markers[activeId].setIcon(createMarkerIcon(prev, false));
+    if (prev) markers[activeId].setIcon(createMarkerIcon(prev, false));
     document.querySelectorAll('.shop-card').forEach(c => c.classList.remove('active'));
   }
 
   activeId = id;
   const shop = SHOPS.find(s => s.id === id);
-  markers[id].setIcon(createMarkerIcon(shop, true));
-  map.setView([shop.lat, shop.lng], 17, { animate: true });
-  markers[id].openPopup();
+  if (!shop) return;
+
+  // اگه مارکر روی نقشه داره
+  if (markers[id]) {
+    markers[id].setIcon(createMarkerIcon(shop, true));
+    map.setView([shop.lat, shop.lng], 17, { animate: true });
+    markers[id].openPopup();
+  } else if (shop.lat && shop.lng) {
+    // مارکر نداره ولی مختصات داره — اضافه‌اش کن
+    addMarker(shop);
+    setTimeout(() => {
+      if (markers[id]) {
+        markers[id].setIcon(createMarkerIcon(shop, true));
+        map.setView([shop.lat, shop.lng], 17, { animate: true });
+        markers[id].openPopup();
+      }
+    }, 100);
+  } else {
+    // بدون مختصات — فقط سایدبار هایلایت کن
+    alert(`${shop.name}\n${shop.address}\n${shop.phone}`);
+  }
 
   const card = document.getElementById(`shop-${id}`);
   if (card) {
