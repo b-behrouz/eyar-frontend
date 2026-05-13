@@ -1355,7 +1355,7 @@ input,textarea{font-family:var(--f)}
       <span class="material-icons-round search-icon">search</span>
       <input type="text" placeholder="جستجو در مغازه‌ها..." id="search-input" oninput="filterShops(this.value)">
     </div>
-    <button class="topbar-chip">
+    <button class="topbar-chip" id="locate-btn" onclick="locateMe()">
       <span class="material-icons-round">my_location</span>
       موقعیت من
     </button>
@@ -1892,11 +1892,56 @@ function filterShops(q) {
   renderSidebar();
 }
 
+let userMarker = null;
+
 function locateMe() {
-  if (!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(pos => {
-    map.setView([pos.coords.latitude, pos.coords.longitude], 16, { animate: true });
-  });
+  const btn = document.getElementById('locate-btn');
+  if (!navigator.geolocation) {
+    alert('مرورگر شما از موقعیت‌یابی پشتیبانی نمی‌کند');
+    return;
+  }
+
+  // حالت بارگذاری
+  if (btn) { btn.style.opacity = '0.6'; btn.style.pointerEvents = 'none'; }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      // برو روی موقعیت
+      map.setView([lat, lng], 16, { animate: true });
+
+      // مارکر موقعیت کاربر
+      if (userMarker) map.removeLayer(userMarker);
+      userMarker = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: '',
+          html: `<div style="
+            width:18px;height:18px;
+            background:#2196F3;
+            border:3px solid #fff;
+            border-radius:50%;
+            box-shadow:0 0 0 4px rgba(33,150,243,0.3);
+          "></div>`,
+          iconSize: [18, 18],
+          iconAnchor: [9, 9]
+        })
+      }).addTo(map);
+      userMarker.bindPopup('<div style="font-family:Vazirmatn,sans-serif;font-size:13px;direction:rtl;padding:4px">📍 موقعیت شما</div>').openPopup();
+
+      if (btn) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; }
+    },
+    err => {
+      if (btn) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; }
+      if (err.code === 1) {
+        alert('دسترسی به موقعیت رد شد.\nلطفاً در تنظیمات مرورگر دسترسی مکان را فعال کنید.');
+      } else {
+        alert('موقعیت شما پیدا نشد. لطفاً دوباره امتحان کنید.');
+      }
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
 }
 
 function callShop(phone) {
