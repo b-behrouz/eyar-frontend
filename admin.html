@@ -618,7 +618,7 @@ body {
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────
-const API = 'https://eyar.onrender.com';   // آدرس سرور FastAPI
+const API = 'http://localhost:8000';   // آدرس سرور FastAPI
 
 // ── STATE ─────────────────────────────────────────────────────────────
 let authHeader = '';
@@ -666,12 +666,25 @@ function selectType(type, el) {
 }
 
 // ── SUBMIT ────────────────────────────────────────────────────────────
+async function geocodeAddress(address) {
+  try {
+    const q = encodeURIComponent(address);
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=ir`,
+      { headers: { 'Accept-Language': 'fa', 'User-Agent': 'EyarApp/1.0' } }
+    );
+    const data = await r.json();
+    if (data && data[0]) {
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+    }
+  } catch(e) {}
+  return { lat: null, lng: null };
+}
+
 async function submitShop() {
   const name    = document.getElementById('f-name').value.trim();
   const phone   = document.getElementById('f-phone').value.trim();
   const address = document.getElementById('f-address').value.trim();
-  const lat     = parseFloat(document.getElementById('f-lat').value) || null;
-  const lng     = parseFloat(document.getElementById('f-lng').value) || null;
 
   if (!name || !phone || !address) {
     showToast('نام، تلفن و آدرس اجباری هستند', 'error');
@@ -686,6 +699,21 @@ async function submitShop() {
     document.getElementById(id).classList.remove('error'));
 
   setLoading('submit-btn', 'submit-spinner', true);
+  showToast('در حال پیدا کردن موقعیت روی نقشه...', 'success');
+
+  // مختصات دستی یا geocoding خودکار
+  let lat = parseFloat(document.getElementById('f-lat').value) || null;
+  let lng = parseFloat(document.getElementById('f-lng').value) || null;
+
+  if (!lat || !lng) {
+    const coords = await geocodeAddress(address);
+    lat = coords.lat;
+    lng = coords.lng;
+    if (lat && lng) {
+      document.getElementById('f-lat').value = lat;
+      document.getElementById('f-lng').value = lng;
+    }
+  }
 
   try {
     const res = await fetch(`${API}/api/admin/shops`, {
@@ -694,7 +722,8 @@ async function submitShop() {
       body: JSON.stringify({ name, phone, address, type: selectedType, lat, lng })
     });
     if (!res.ok) throw new Error();
-    showToast('طلافروشی با موفقیت اضافه شد ✓', 'success');
+    const msg = lat ? 'طلافروشی با موقعیت روی نقشه اضافه شد ✓' : 'طلافروشی اضافه شد (موقعیت یافت نشد)';
+    showToast(msg, 'success');
     clearForm();
     loadShops();
   } catch {
