@@ -517,7 +517,14 @@ body {
         </div>
         <div class="field">
           <label>آدرس کامل <span style="color:var(--error)">*</span></label>
-          <input type="text" id="f-address" placeholder="تهران، خیابان...، پلاک ...">
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="text" id="f-address" placeholder="تهران، خیابان...، پلاک ..." style="flex:1" oninput="clearCoords()">
+            <button type="button" onclick="findLocation()" id="find-loc-btn"
+              style="height:48px;padding:0 14px;border-radius:10px;background:#FFF0C8;color:#7A4800;border:1px solid #D4A843;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">
+              📍 پیدا کن
+            </button>
+          </div>
+          <div id="geo-status" style="font-size:12px;margin-top:4px;display:none"></div>
         </div>
         <div class="field">
           <label>نوع مغازه <span style="color:var(--error)">*</span></label>
@@ -666,18 +673,68 @@ function selectType(type, el) {
 }
 
 // ── SUBMIT ────────────────────────────────────────────────────────────
+function clearCoords() {
+  document.getElementById('f-lat').value = '';
+  document.getElementById('f-lng').value = '';
+  const status = document.getElementById('geo-status');
+  if (status) { status.style.display = 'none'; status.textContent = ''; }
+}
+
+async function findLocation() {
+  const address = document.getElementById('f-address').value.trim();
+  if (!address) { showToast('ابتدا آدرس را وارد کنید', 'error'); return; }
+
+  const btn = document.getElementById('find-loc-btn');
+  const status = document.getElementById('geo-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ در حال جستجو...';
+  status.style.display = 'block';
+  status.style.color = '#888';
+  status.textContent = 'در حال پیدا کردن موقعیت...';
+
+  const coords = await geocodeAddress(address);
+
+  if (coords.lat && coords.lng) {
+    document.getElementById('f-lat').value = coords.lat.toFixed(6);
+    document.getElementById('f-lng').value = coords.lng.toFixed(6);
+    status.style.color = '#386A20';
+    status.textContent = `✓ موقعیت پیدا شد: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`;
+    showToast('موقعیت روی نقشه پیدا شد ✓', 'success');
+  } else {
+    status.style.color = '#BA1A1A';
+    status.textContent = '✗ موقعیت پیدا نشد — مختصات را دستی وارد کنید';
+    showToast('موقعیت پیدا نشد، آدرس را دقیق‌تر بنویسید', 'error');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '📍 پیدا کن';
+}
+
 async function geocodeAddress(address) {
+  // سرویس ۱: Nominatim
   try {
-    const q = encodeURIComponent(address);
+    const q = encodeURIComponent(address + ' ایران');
     const r = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1&countrycodes=ir`,
-      { headers: { 'Accept-Language': 'fa', 'User-Agent': 'EyarApp/1.0' } }
+      `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`,
+      { headers: { 'Accept-Language': 'fa' } }
     );
     const data = await r.json();
     if (data && data[0]) {
       return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
     }
   } catch(e) {}
+
+  // سرویس ۲: Photon
+  try {
+    const q = encodeURIComponent(address);
+    const r = await fetch(`https://photon.komoot.io/api/?q=${q}&limit=1&lang=fa`);
+    const data = await r.json();
+    if (data && data.features && data.features[0]) {
+      const coords = data.features[0].geometry.coordinates;
+      return { lat: coords[1], lng: coords[0] };
+    }
+  } catch(e) {}
+
   return { lat: null, lng: null };
 }
 
