@@ -1674,6 +1674,10 @@ function showSection(section) {
   const mapApp = document.getElementById('app');
   const landingView = document.getElementById('landing-view');
   const backBtn = document.getElementById('back-to-landing');
+  const popup = document.getElementById('popup-overlay');
+
+  // همیشه popup رو ببند
+  if (popup) popup.style.display = 'none';
 
   if (section === 'map') {
     document.body.classList.add('map-mode');
