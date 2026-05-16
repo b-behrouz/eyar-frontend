@@ -1652,6 +1652,15 @@ input,textarea{font-family:var(--f)}
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+function scrollToSection(id) {
+  showSection('landing');
+  setTimeout(() => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }, 100);
+}
+
+
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwrVohnlGPPysm5ibZnKinewSNto_HenLSr9tsbxajpBMz0F9Rx7T23B6O2_yoA9VMF/exec';
 
 async function submitSupport() {
@@ -1660,39 +1669,27 @@ async function submitSupport() {
   const message = document.getElementById('sup-message').value.trim();
   const btn     = document.getElementById('sup-btn');
   const status  = document.getElementById('sup-status');
-
   if (!name || !phone || !message) {
-    status.style.display = 'inline';
-    status.style.color = '#BA1A1A';
-    status.textContent = 'همه فیلدها را پر کنید';
-    return;
+    status.style.display='inline'; status.style.color='#BA1A1A';
+    status.textContent='همه فیلدها را پر کنید'; return;
   }
-
-  btn.disabled = true;
-  btn.textContent = '⏳ در حال ارسال...';
-  status.style.display = 'none';
-
+  btn.disabled=true; btn.textContent='⏳ ارسال...'; status.style.display='none';
   try {
     await fetch(SHEETS_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'support', name, phone, message })
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({type:'support', name, phone, message})
     });
-    status.style.display = 'inline';
-    status.style.color = '#386A20';
-    status.textContent = '✓ پیام شما ارسال شد';
-    document.getElementById('sup-name').value = '';
-    document.getElementById('sup-phone').value = '';
-    document.getElementById('sup-message').value = '';
+    status.style.display='inline'; status.style.color='#386A20';
+    status.textContent='✓ پیام ارسال شد';
+    document.getElementById('sup-name').value='';
+    document.getElementById('sup-phone').value='';
+    document.getElementById('sup-message').value='';
   } catch(e) {
-    status.style.display = 'inline';
-    status.style.color = '#BA1A1A';
-    status.textContent = 'خطا در ارسال، دوباره امتحان کنید';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'ارسال';
+    status.style.display='inline'; status.style.color='#BA1A1A';
+    status.textContent='خطا، دوباره امتحان کنید';
   }
+  btn.disabled=false; btn.textContent='ارسال';
 }
 
 async function submitRegister() {
@@ -1702,48 +1699,28 @@ async function submitRegister() {
   const note    = document.getElementById('reg-note').value.trim();
   const btn     = document.getElementById('reg-btn');
   const status  = document.getElementById('reg-status');
-
   if (!name || !phone || !address) {
-    status.style.display = 'inline';
-    status.style.color = '#BA1A1A';
-    status.textContent = 'نام، تلفن و آدرس اجباری هستند';
-    return;
+    status.style.display='inline'; status.style.color='#BA1A1A';
+    status.textContent='نام، تلفن و آدرس اجباری هستند'; return;
   }
-
-  btn.disabled = true;
-  btn.textContent = '⏳ در حال ثبت...';
-  status.style.display = 'none';
-
+  btn.disabled=true; btn.textContent='⏳ ثبت...'; status.style.display='none';
   try {
     await fetch(SHEETS_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'register', name, phone, address, note })
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({type:'register', name, phone, address, note})
     });
-    status.style.display = 'inline';
-    status.style.color = '#386A20';
-    status.textContent = '✓ درخواست ثبت شد، به زودی تماس می‌گیریم';
-    document.getElementById('reg-name').value = '';
-    document.getElementById('reg-phone').value = '';
-    document.getElementById('reg-address').value = '';
-    document.getElementById('reg-note').value = '';
+    status.style.display='inline'; status.style.color='#386A20';
+    status.textContent='✓ درخواست ثبت شد، به زودی تماس می‌گیریم';
+    document.getElementById('reg-name').value='';
+    document.getElementById('reg-phone').value='';
+    document.getElementById('reg-address').value='';
+    document.getElementById('reg-note').value='';
   } catch(e) {
-    status.style.display = 'inline';
-    status.style.color = '#BA1A1A';
-    status.textContent = 'خطا در ثبت، دوباره امتحان کنید';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'ثبت رایگان';
+    status.style.display='inline'; status.style.color='#BA1A1A';
+    status.textContent='خطا، دوباره امتحان کنید';
   }
-}
-
-function scrollToSection(id) {
-  showSection('landing');
-  setTimeout(() => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  }, 100);
+  btn.disabled=false; btn.textContent='ثبت رایگان';
 }
 
 /* ════ SECTION MANAGER ════ */
@@ -1762,6 +1739,8 @@ function showSection(section) {
   const mapApp = document.getElementById('app');
   const landingView = document.getElementById('landing-view');
   const backBtn = document.getElementById('back-to-landing');
+  const popup = document.getElementById('popup-overlay');
+  if (popup) popup.style.display = 'none';
 
   if (section === 'map') {
     document.body.classList.add('map-mode');
