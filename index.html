@@ -1794,9 +1794,12 @@ function startApp() {
 async function initMap() {
   map = L.map('map', { zoomControl: false, attributionControl: false }).setView([35.700, 51.348], 15);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '© CartoDB',
-    maxZoom: 19
+  L.tileLayer('https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=U6zIXNsUrOaXa96xyEEw', {
+    attribution: '© MapTiler © OpenStreetMap',
+    maxZoom: 20,
+    tileSize: 512,
+    zoomOffset: -1,
+    crossOrigin: true
   }).addTo(map);
 
   L.control.zoom({ position: 'bottomleft', zoomInText: '+', zoomOutText: '−' }).addTo(map);
