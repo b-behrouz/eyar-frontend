@@ -2107,16 +2107,16 @@ function startApp() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  // Show map immediately behind popup
-  document.body.classList.add('map-mode');
-  const app = document.getElementById('app');
-  app.style.display = 'flex';
-  initMap();
-  // IntersectionObserver for landing fade animations
+
   const io = new IntersectionObserver(entries => {
-    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
-  }, {threshold: 0.1});
-  document.querySelectorAll('#landing-view .fade').forEach(el => io.observe(el));
+    entries.forEach(e => {
+      if(e.isIntersecting) e.target.classList.add('in');
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('#landing-view .fade')
+    .forEach(el => io.observe(el));
+
 });
 
 </script>
