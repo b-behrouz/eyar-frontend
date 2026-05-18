@@ -1559,20 +1559,19 @@ input,textarea{font-family:var(--f)}
         <div class="lf-fields">
           <div class="lf-fld">
             <label class="lf-label">نام</label>
-            <input class="lf-inp" id="sup-name" type="text" placeholder="نام خود را وارد کنید">
+            <input class="lf-inp" type="text" placeholder="نام خود را وارد کنید">
           </div>
           <div class="lf-fld">
             <label class="lf-label">شماره تماس</label>
-            <input class="lf-inp" id="sup-phone" type="tel" placeholder="شماره تماس" dir="ltr" style="text-align:right">
+            <input class="lf-inp" type="tel" placeholder="شماره تماس" dir="ltr" style="text-align:right">
           </div>
           <div class="lf-fld">
             <label class="lf-label">متن</label>
-            <textarea class="lf-ta" id="sup-message" placeholder="مثال: با مشکل روبرو هستم"></textarea>
+            <textarea class="lf-ta" placeholder="مثال: با مشکل روبرو هستم"></textarea>
           </div>
         </div>
-        <div style="margin-top:16px;display:flex;align-items:center;gap:12px">
-          <button id="sup-btn" onclick="submitSupport()" style="height:36px;padding:0 20px;border-radius:8px;background:transparent;color:#D97757;font-family:'Vazirmatn',sans-serif;font-size:14px;font-weight:600;border:1px solid #D97757;cursor:pointer" onmouseover="this.style.background='#FEF3EE'" onmouseout="this.style.background='transparent'">ارسال</button>
-          <span id="sup-status" style="font-size:13px;font-family:'Vazirmatn',sans-serif;display:none"></span>
+        <div style="margin-top:16px">
+          <button style="height:36px;padding:0 20px;border-radius:8px;background:transparent;color:#D97757;font-family:'Vazirmatn',sans-serif;font-size:14px;font-weight:600;border:1px solid #D97757;cursor:pointer" onmouseover="this.style.background='#FEF3EE'" onmouseout="this.style.background='transparent'">ارسال</button>
         </div>
       </div>
 
@@ -1583,25 +1582,24 @@ input,textarea{font-family:var(--f)}
           <div class="lf-row2">
             <div class="lf-fld">
               <label class="lf-label">نام</label>
-              <input class="lf-inp" id="reg-name" type="text" placeholder="نام خود را وارد کنید">
+              <input class="lf-inp" type="text" placeholder="نام خود را وارد کنید">
             </div>
             <div class="lf-fld">
               <label class="lf-label">شماره تماس</label>
-              <input class="lf-inp" id="reg-phone" type="tel" placeholder="شماره تماس" dir="ltr" style="text-align:right">
+              <input class="lf-inp" type="tel" placeholder="شماره تماس" dir="ltr" style="text-align:right">
             </div>
           </div>
           <div class="lf-fld">
             <label class="lf-label">آدرس</label>
-            <input class="lf-inp" id="reg-address" type="text" placeholder="مثال: آدرس را وارد نمایید">
+            <input class="lf-inp" type="text" placeholder="مثال: آدرس را وارد نمایید">
           </div>
           <div class="lf-fld">
             <label class="lf-label">یادداشت (اختیاری)</label>
-            <textarea class="lf-ta" id="reg-note" placeholder="هر توضیح اضافه‌ای اینجا بنویسید"></textarea>
+            <textarea class="lf-ta" placeholder="هر توضیح اضافه‌ای اینجا بنویسید"></textarea>
           </div>
         </div>
-        <div style="margin-top:16px;display:flex;align-items:center;gap:12px">
-          <button id="reg-btn" onclick="submitRegister()" style="height:36px;padding:0 20px;border-radius:8px;background:transparent;color:#D97757;font-family:'Vazirmatn',sans-serif;font-size:14px;font-weight:600;border:1px solid #D97757;cursor:pointer" onmouseover="this.style.background='#FEF3EE'" onmouseout="this.style.background='transparent'">ثبت رایگان</button>
-          <span id="reg-status" style="font-size:13px;font-family:'Vazirmatn',sans-serif;display:none"></span>
+        <div style="margin-top:16px">
+          <button style="height:36px;padding:0 20px;border-radius:8px;background:transparent;color:#D97757;font-family:'Vazirmatn',sans-serif;font-size:14px;font-weight:600;border:1px solid #D97757;cursor:pointer" onmouseover="this.style.background='#FEF3EE'" onmouseout="this.style.background='transparent'">ثبت رایگان</button>
         </div>
       </div>
 
@@ -1650,7 +1648,44 @@ input,textarea{font-family:var(--f)}
 
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwzD1M1TU3s-D_0NVSQRguGj_qTnvsPxaU6Ddzko8tgoEr_mJ3PbpzSl32NpvnmtRpgXg/exec';
+
+async function submitSupport() {
+  const name=document.getElementById('sup-name').value.trim();
+  const phone=document.getElementById('sup-phone').value.trim();
+  const message=document.getElementById('sup-message').value.trim();
+  const btn=document.getElementById('sup-btn');
+  const status=document.getElementById('sup-status');
+  if(!name||!phone||!message){status.style.display='inline';status.style.color='#BA1A1A';status.textContent='همه فیلدها را پر کنید';return;}
+  btn.disabled=true;btn.textContent='⏳ ارسال...';status.style.display='none';
+  try{
+    await fetch(SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'support',name,phone,message})});
+    status.style.display='inline';status.style.color='#386A20';status.textContent='✓ پیام ارسال شد';
+    document.getElementById('sup-name').value='';document.getElementById('sup-phone').value='';document.getElementById('sup-message').value='';
+  }catch(e){status.style.display='inline';status.style.color='#BA1A1A';status.textContent='خطا، دوباره امتحان کنید';}
+  btn.disabled=false;btn.textContent='ارسال';
+}
+
+async function submitRegister() {
+  const name=document.getElementById('reg-name').value.trim();
+  const phone=document.getElementById('reg-phone').value.trim();
+  const address=document.getElementById('reg-address').value.trim();
+  const note=document.getElementById('reg-note')?document.getElementById('reg-note').value.trim():'';
+  const btn=document.getElementById('reg-btn');
+  const status=document.getElementById('reg-status');
+  if(!name||!phone||!address){status.style.display='inline';status.style.color='#BA1A1A';status.textContent='نام، تلفن و آدرس اجباری هستند';return;}
+  btn.disabled=true;btn.textContent='⏳ ثبت...';status.style.display='none';
+  try{
+    await fetch(SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'register',name,phone,address,note})});
+    status.style.display='inline';status.style.color='#386A20';status.textContent='✓ درخواست ثبت شد';
+    document.getElementById('reg-name').value='';document.getElementById('reg-phone').value='';document.getElementById('reg-address').value='';
+    if(document.getElementById('reg-note'))document.getElementById('reg-note').value='';
+  }catch(e){status.style.display='inline';status.style.color='#BA1A1A';status.textContent='خطا، دوباره امتحان کنید';}
+  btn.disabled=false;btn.textContent='ثبت رایگان';
+}
+
+</script>
 <script>
 function scrollToSection(id) {
   showSection('landing');
@@ -1658,69 +1693,6 @@ function scrollToSection(id) {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   }, 100);
-}
-
-
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbz4QGt2GVuUn5OHt9zOwtI4Xfmf-DlttboaWqenzCUgCxuKJym1jA1qbPevnV68hHrwmg/exec';
-
-async function submitSupport() {
-  const name    = document.getElementById('sup-name').value.trim();
-  const phone   = document.getElementById('sup-phone').value.trim();
-  const message = document.getElementById('sup-message').value.trim();
-  const btn     = document.getElementById('sup-btn');
-  const status  = document.getElementById('sup-status');
-  if (!name || !phone || !message) {
-    status.style.display='inline'; status.style.color='#BA1A1A';
-    status.textContent='همه فیلدها را پر کنید'; return;
-  }
-  btn.disabled=true; btn.textContent='⏳ ارسال...'; status.style.display='none';
-  try {
-    await fetch(SHEETS_URL, {
-      method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({type:'support', name, phone, message})
-    });
-    status.style.display='inline'; status.style.color='#386A20';
-    status.textContent='✓ پیام ارسال شد';
-    document.getElementById('sup-name').value='';
-    document.getElementById('sup-phone').value='';
-    document.getElementById('sup-message').value='';
-  } catch(e) {
-    status.style.display='inline'; status.style.color='#BA1A1A';
-    status.textContent='خطا، دوباره امتحان کنید';
-  }
-  btn.disabled=false; btn.textContent='ارسال';
-}
-
-async function submitRegister() {
-  const name    = document.getElementById('reg-name').value.trim();
-  const phone   = document.getElementById('reg-phone').value.trim();
-  const address = document.getElementById('reg-address').value.trim();
-  const note    = document.getElementById('reg-note').value.trim();
-  const btn     = document.getElementById('reg-btn');
-  const status  = document.getElementById('reg-status');
-  if (!name || !phone || !address) {
-    status.style.display='inline'; status.style.color='#BA1A1A';
-    status.textContent='نام، تلفن و آدرس اجباری هستند'; return;
-  }
-  btn.disabled=true; btn.textContent='⏳ ثبت...'; status.style.display='none';
-  try {
-    await fetch(SHEETS_URL, {
-      method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({type:'register', name, phone, address, note})
-    });
-    status.style.display='inline'; status.style.color='#386A20';
-    status.textContent='✓ درخواست ثبت شد، به زودی تماس می‌گیریم';
-    document.getElementById('reg-name').value='';
-    document.getElementById('reg-phone').value='';
-    document.getElementById('reg-address').value='';
-    document.getElementById('reg-note').value='';
-  } catch(e) {
-    status.style.display='inline'; status.style.color='#BA1A1A';
-    status.textContent='خطا، دوباره امتحان کنید';
-  }
-  btn.disabled=false; btn.textContent='ثبت رایگان';
 }
 
 /* ════ SECTION MANAGER ════ */
@@ -1798,8 +1770,7 @@ async function initMap() {
     attribution: '© MapTiler © OpenStreetMap',
     maxZoom: 20,
     tileSize: 512,
-    zoomOffset: -1,
-    crossOrigin: true
+    zoomOffset: -1
   }).addTo(map);
 
   L.control.zoom({ position: 'bottomleft', zoomInText: '+', zoomOutText: '−' }).addTo(map);
@@ -1989,8 +1960,16 @@ function applyFilter(type, btn) {
 }
 
 function filterShops(q) {
-  searchQuery = q;
+  searchQuery = q.trim();
   renderSidebar();
+  // مارکرهای نقشه رو فیلتر کن
+  Object.values(markers).forEach(m => map.removeLayer(m));
+  markers = {};
+  SHOPS.filter(s => {
+    const mf = currentFilter === 'all' || s.type === currentFilter;
+    const ms = !searchQuery || s.name.includes(searchQuery) || s.address.includes(searchQuery) || s.phone.includes(searchQuery);
+    return mf && ms && s.lat && s.lng;
+  }).forEach(s => addMarker(s));
 }
 
 let userMarker = null;
