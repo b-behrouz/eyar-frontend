@@ -1648,9 +1648,7 @@ input,textarea{font-family:var(--f)}
 
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwzD1M1TU3s-D_0NVSQRguGj_qTnvsPxaU6Ddzko8tgoEr_mJ3PbpzSl32NpvnmtRpgXg/exec';
 
 async function submitSupport() {
@@ -1766,7 +1764,7 @@ function startApp() {
 // Map init handled by showSection()
 
 async function initMap() {
-  map = L.map('map', { zoomControl: false, attributionControl: false }).setView([35.700, 51.348], 15);
+  map = L.map('map', { zoomControl: false, attributionControl: false }).setView([35.700, 51.348], 14);
 
   L.tileLayer('https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=U6zIXNsUrOaXa96xyEEw', {
     attribution: '© MapTiler © OpenStreetMap',
@@ -1778,6 +1776,55 @@ async function initMap() {
   L.control.zoom({ position: 'bottomleft', zoomInText: '+', zoomOutText: '−' }).addTo(map);
 
   await fetchShops();
+
+  // لوکیشن کاربر رو بگیر و نقشه رو روش ببر
+  autoLocate();
+}
+
+function autoLocate() {
+  if (!navigator.geolocation) return;
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const acc = pos.coords.accuracy;
+
+      // برو روی موقعیت کاربر
+      map.setView([lat, lng], 15, { animate: true });
+
+      // مارکر موقعیت کاربر
+      if (userMarker) map.removeLayer(userMarker);
+      if (userCircle) map.removeLayer(userCircle);
+
+      userCircle = L.circle([lat, lng], {
+        radius: acc,
+        color: '#2196F3',
+        fillColor: '#2196F3',
+        fillOpacity: 0.08,
+        weight: 1
+      }).addTo(map);
+
+      userMarker = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: '',
+          html: `<div style="width:16px;height:16px;background:#2196F3;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(33,150,243,0.25)"></div>`,
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
+        }),
+        zIndexOffset: 1000
+      }).addTo(map);
+
+      userMarker.bindPopup(
+        `<div style="font-family:Vazirmatn,sans-serif;font-size:13px;direction:rtl;padding:4px">📍 موقعیت شما</div>`
+      );
+    },
+    err => {
+      // اگه دسترسی نداد، تهران رو نشون بده
+      console.log('Geolocation error:', err.message);
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
 }
 
 async function fetchShops() {
@@ -2107,16 +2154,16 @@ function startApp() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-
+  // Show map immediately behind popup
+  document.body.classList.add('map-mode');
+  const app = document.getElementById('app');
+  app.style.display = 'flex';
+  initMap();
+  // IntersectionObserver for landing fade animations
   const io = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if(e.isIntersecting) e.target.classList.add('in');
-    });
-  }, { threshold: 0.1 });
-
-  document.querySelectorAll('#landing-view .fade')
-    .forEach(el => io.observe(el));
-
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+  }, {threshold: 0.1});
+  document.querySelectorAll('#landing-view .fade').forEach(el => io.observe(el));
 });
 
 </script>
