@@ -1501,12 +1501,11 @@ input,textarea{font-family:var(--f)}
   bottom: 0; right: 0; left: 0;
   z-index: 90;
   background: transparent;
-  padding: 0 0 env(safe-area-inset-bottom, 12px);
-  /* فقط ارتفاع یک کارت + padding */
+  padding-bottom: env(safe-area-inset-bottom, 12px);
   pointer-events: none;
 }
 
-.mob-card-handle { display: none; } /* دستگیره لازم نیست */
+.mob-card-handle { display: none; }
 
 /* نوار اسکرول افقی */
 #mob-card-list {
@@ -1519,42 +1518,71 @@ input,textarea{font-family:var(--f)}
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  padding: 8px 16px 12px;
+  padding: 8px 16px 14px;
   pointer-events: auto;
 }
 #mob-card-list::-webkit-scrollbar { display: none; }
 
-/* شمارنده */
 .mob-card-count { display: none; }
 
-/* هر کارت */
+/* هر کارت — full width مثل نشان */
 .mob-card-item {
   flex: 0 0 auto;
-  width: 220px;
+  width: calc(100vw - 32px);
+  max-width: 420px;
   display: flex;
-  flex-direction: column;
-  gap: 0;
-  padding: 12px 14px;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
   background: var(--white);
-  border-radius: 14px;
+  border-radius: 16px;
   border: 1px solid var(--border);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
   cursor: pointer;
-  transition: transform .15s, box-shadow .15s;
-  scroll-snap-align: start;
+  transition: transform .15s;
+  scroll-snap-align: center;
 }
-.mob-card-item:active { transform: scale(0.97); }
+.mob-card-item:active { transform: scale(0.98); }
+
+/* آیکون نوع مغازه */
+.mob-card-icon {
+  flex-shrink: 0;
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: #FEF3EE;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
 
 .mob-card-info { flex: 1; min-width: 0; }
-.mob-card-name { font-size: 13px; font-weight: 700; color: var(--t1); margin-bottom: 5px; }
+
+.mob-card-name {
+  font-size: 15px; font-weight: 700;
+  color: var(--t1); margin-bottom: 5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .mob-card-badge {
   display: inline-flex; align-items: center;
   font-size: 11px; font-weight: 600;
-  padding: 2px 8px; border-radius: 100px;
+  padding: 2px 10px; border-radius: 100px;
   margin-bottom: 6px;
 }
-.mob-card-addr { font-size: 11px; color: var(--t2); line-height: 1.5; }
-.mob-card-phone { font-size: 11px; color: var(--t3); margin-top: 4px; direction: ltr; text-align: right; }
+.mob-card-addr {
+  font-size: 12px; color: var(--t2); line-height: 1.5;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mob-card-phone {
+  font-size: 12px; color: var(--t3);
+  margin-top: 3px; direction: ltr; text-align: right;
+}
+
+/* فلش سمت چپ */
+.mob-card-arrow {
+  flex-shrink: 0;
+  color: var(--t3);
+  font-size: 20px;
+}
 
 /* ─── MOBILE MENU BUTTON ─── */
 .mob-menu-btn {
@@ -1977,7 +2005,7 @@ input,textarea{font-family:var(--f)}
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwzD1M1TU3s-D_0NVSQRguGj_qTnvsPxaU6Ddzko8tgoEr_mJ3PbpzSl32NpvnmtRpgXg/exec';
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzU4p8fqXHaHQzkiCutDjc3CIpYc9A5I3Crq2Xpy3bzMuOx_7rVqJun6NrqCONeCZxSMw/exec';
 
 async function submitSupport() {
   const name=document.getElementById('sup-name').value.trim();
@@ -2564,15 +2592,18 @@ function renderMobCards() {
 
   const TYPE_LABELS = { gold:'طلافروشی', silver:'نقره‌فروشی', jewelry:'جواهرفروشی', coin:'سکه‌فروشی' };
   const BADGE_COLOR = { gold:'background:#FEF3EE;color:#D97757', silver:'background:#F0F0F8;color:#404060', jewelry:'background:#FFF0F5;color:#900050', coin:'background:#F0F8F0;color:#2A6030' };
+  const TYPE_ICON = { gold:'⚜', silver:'🥈', jewelry:'💎', coin:'🪙' };
 
   list.innerHTML = filtered.map(s => `
       <div class="mob-card-item" onclick="mobSelectShop(${s.id})">
+        <div class="mob-card-icon">${TYPE_ICON[s.type]||'⚜'}</div>
         <div class="mob-card-info">
           <div class="mob-card-name">${s.name}</div>
           <span class="mob-card-badge" style="${BADGE_COLOR[s.type]||''}">${TYPE_LABELS[s.type]||''}</span>
-          <div class="mob-card-addr">${s.address}</div>
-          <div class="mob-card-phone">${s.phone}</div>
+          <div class="mob-card-addr">📍 ${s.address}</div>
+          <div class="mob-card-phone">📞 ${s.phone}</div>
         </div>
+        <span class="material-icons-round mob-card-arrow">chevron_left</span>
       </div>`).join('');
 }
 
