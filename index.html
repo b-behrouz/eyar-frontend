@@ -217,6 +217,11 @@
     flex-direction: row;
   }
 
+  /* هدر زیر overlay وقتی popup باز است */
+  body.popup-open #topbar {
+    z-index: 9998;
+  }
+
   /* ─── TOPBAR ─── */
   #topbar {
     position: fixed;
@@ -280,7 +285,7 @@
     border-radius: var(--br);
     border: 1px solid var(--border);
     background: var(--white);
-    padding: 0 40px 0 12px;
+    padding: 0 12px 0 12px;
     font-family: var(--font);
     font-size: 14px;
     color: var(--t1);
@@ -395,19 +400,19 @@
     content: '';
     position: absolute;
     top: 0; bottom: 0;
-    width: 24px;
+    width: 28px;
     z-index: 2;
     pointer-events: none;
   }
 
   .filter-carousel-wrap::before {
     right: 0;
-    background: linear-gradient(to left, var(--md-sys-color-surface), transparent);
+    background: linear-gradient(to left, #EEECEA, transparent);
   }
 
   .filter-carousel-wrap::after {
     left: 0;
-    background: linear-gradient(to right, var(--md-sys-color-surface), transparent);
+    background: linear-gradient(to right, #EEECEA, transparent);
   }
 
   .sidebar-filter {
@@ -421,8 +426,11 @@
     -ms-overflow-style: none;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
+    cursor: grab;
+    user-select: none;
   }
 
+  .sidebar-filter.dragging { cursor: grabbing; scroll-behavior: auto; }
   .sidebar-filter::-webkit-scrollbar { display: none; }
 
   .filter-chip {
@@ -629,6 +637,7 @@
     margin: 0 !important;
     font-family: var(--font) !important;
     direction: rtl;
+    padding-left: 32px !important;
   }
 
   .leaflet-popup-tip-container { display: none; }
@@ -812,9 +821,9 @@
       top: auto;
       bottom: 0;
       width: 100%;
-      height: 38vh;
-      min-height: 160px;
-      max-height: 60vh;
+      height: 28vh;
+      min-height: 120px;
+      max-height: 45vh;
       border-left: none;
       border-top: 1px solid var(--border);
       border-radius: 20px 20px 0 0;
@@ -836,7 +845,7 @@
 
     #map-container {
       right: 0;
-      bottom: 38vh;
+      bottom: 0;
       top: 54px;
     }
 
@@ -859,6 +868,31 @@
     .map-popup-name { font-size: 13px; }
 
     .map-legend { display: none; }
+
+    /* ─── فیلتر تگ‌ها زیر سرچ در موبایل ─── */
+    #mobile-filter-bar {
+      display: flex !important;
+    }
+
+    /* سایدبار اصلی مخفی در موبایل */
+    #sidebar {
+      display: none !important;
+    }
+
+    #map-container {
+      bottom: 0;
+      top: 54px;
+    }
+
+    /* کارت پایین موبایل */
+    #mobile-card {
+      display: block !important;
+      bottom: 0;
+    }
+
+    #map-container {
+      bottom: 0 !important;
+    }
   }
 
   /* موبایل خیلی کوچیک */
@@ -1182,7 +1216,7 @@ input,textarea{font-family:var(--f)}
   padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:28px;
 }
 #landing-view .ft-logo{font-size:18px;font-weight:800;color:#fff;margin-bottom:12px}
-#landing-view .ft-tag{font-size:13px;line-height:1.8;color:#6B6760;max-width:240px}
+#landing-view .ft-tag{font-size:13px;line-height:1.8;color:#B8B4AD;max-width:240px}
 #landing-view .ft-badge{
   display:inline-flex;align-items:center;gap:6px;margin-top:16px;
   background:rgba(217,119,87,.1);border:1px solid rgba(217,119,87,.2);
@@ -1190,11 +1224,11 @@ input,textarea{font-family:var(--f)}
 }
 #landing-view .ft-col-t{font-size:13px;font-weight:600;color:#fff;margin-bottom:16px}
 #landing-view .ft-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
-#landing-view .ft-col a{font-size:13px;color:#6B6760;transition:color .15s}
+#landing-view .ft-col a{font-size:13px;color:#B8B4AD;transition:color .15s}
 #landing-view .ft-col a:hover{color:#fff}
 #landing-view .ft-bottom{
   display:flex;align-items:center;justify-content:space-between;
-  font-size:12px;color:#4A4740;
+  font-size:12px;color:#8A8680;
 }
 
 /* ── FADE ── */
@@ -1209,7 +1243,39 @@ input,textarea{font-family:var(--f)}
   #landing-view .forms-grid{grid-template-columns:1fr}
   #landing-view .ft-top{grid-template-columns:1fr 1fr}
   #landing-view .wrap{padding:0 20px}
-  #landing-view .nav-links{display:none}
+
+  /* هدر یک ردیف در موبایل */
+  #landing-view .nav { height: 54px; }
+  #landing-view .nav .wrap {
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: nowrap;
+    padding: 0 16px;
+  }
+
+  /* لوگو راست — بدون تغییر */
+  #landing-view .nav-logo { font-size: 16px; flex-shrink: 0; }
+
+  /* لینک‌ها وسط */
+  #landing-view .nav-links {
+    display: flex !important;
+    flex: 1;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: nowrap;
+    overflow: visible;
+    border-top: none;
+    padding: 0;
+    margin: 0;
+  }
+  #landing-view .nav-links li { flex-shrink: 0; }
+  #landing-view .nav-links a { font-size: 13px; white-space: nowrap; padding: 6px 10px; }
+  .nav-mob-hide { display: none !important; }
+
+  .lf-card { scroll-margin-top: 110px; }
 }
 
 
@@ -1264,6 +1330,7 @@ input,textarea{font-family:var(--f)}
   display: flex;
   flex-direction: column;
   min-height: 400px;
+  scroll-margin-top: 70px;
 }
 
 .lf-card-title {
@@ -1384,6 +1451,184 @@ input,textarea{font-family:var(--f)}
   .lf-row2 { grid-template-columns: 1fr; }
 }
 
+
+/* ─── MOBILE FILTER BAR ─────────────────────────── */
+#mobile-filter-bar {
+  display: none;
+  position: fixed;
+  top: 54px;
+  right: 0; left: 0;
+  z-index: 90;
+  background: rgba(250,249,245,0.95);
+  backdrop-filter: blur(8px);
+  padding: 8px 12px;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--border);
+  -webkit-overflow-scrolling: touch;
+}
+#mobile-filter-bar::-webkit-scrollbar { display: none; }
+
+.mob-chip {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: 28px;
+  padding: 0 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font);
+  background: var(--white);
+  border: 1px solid var(--border);
+  color: var(--t2);
+  cursor: pointer;
+  transition: all .15s;
+}
+.mob-chip.on {
+  background: var(--p);
+  border-color: var(--p);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ─── MOBILE BOTTOM CARD — horizontal scroll ──────── */
+#mobile-card {
+  display: none;
+  position: fixed;
+  bottom: 0; right: 0; left: 0;
+  z-index: 90;
+  background: transparent;
+  padding: 0 0 env(safe-area-inset-bottom, 12px);
+  /* فقط ارتفاع یک کارت + padding */
+  pointer-events: none;
+}
+
+.mob-card-handle { display: none; } /* دستگیره لازم نیست */
+
+/* نوار اسکرول افقی */
+#mob-card-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding: 8px 16px 12px;
+  pointer-events: auto;
+}
+#mob-card-list::-webkit-scrollbar { display: none; }
+
+/* شمارنده */
+.mob-card-count { display: none; }
+
+/* هر کارت */
+.mob-card-item {
+  flex: 0 0 auto;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 12px 14px;
+  background: var(--white);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+  scroll-snap-align: start;
+}
+.mob-card-item:active { transform: scale(0.97); }
+
+.mob-card-info { flex: 1; min-width: 0; }
+.mob-card-name { font-size: 13px; font-weight: 700; color: var(--t1); margin-bottom: 5px; }
+.mob-card-badge {
+  display: inline-flex; align-items: center;
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 100px;
+  margin-bottom: 6px;
+}
+.mob-card-addr { font-size: 11px; color: var(--t2); line-height: 1.5; }
+.mob-card-phone { font-size: 11px; color: var(--t3); margin-top: 4px; direction: ltr; text-align: right; }
+
+/* ─── MOBILE MENU BUTTON ─── */
+.mob-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: var(--br);
+  background: none;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--t1);
+  flex-shrink: 0;
+}
+.mob-menu-btn .material-icons-round { font-size: 20px; }
+
+/* ─── MOBILE MENU DRAWER ─── */
+#mob-menu-drawer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  background: rgba(26,25,22,0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+#mob-menu-drawer.open { display: block; }
+
+#mob-menu-panel {
+  position: absolute;
+  top: 0; left: 0;
+  width: 80vw; max-width: 280px;
+  height: 100%;
+  background: var(--bg);
+  box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+  display: flex; flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+}
+#mob-menu-drawer.open #mob-menu-panel { transform: translateX(0); }
+
+.mob-menu-header {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.mob-menu-logo { display: flex; align-items: center; gap: 8px; }
+
+.mob-menu-nav {
+  display: flex; flex-direction: column;
+  padding: 8px 0;
+  overflow-y: auto;
+  flex: 1;
+}
+.mob-menu-item {
+  display: flex; align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  font-size: 14px; font-weight: 500;
+  color: var(--t1);
+  text-decoration: none;
+  transition: background .15s;
+  border-radius: 0;
+}
+.mob-menu-item:active { background: var(--md-sys-color-surface-variant); }
+.mob-menu-item .material-icons-round { font-size: 20px; color: var(--t3); }
+
+@media (max-width: 768px) {
+  .mob-menu-btn { display: flex; }
+  /* سرچ کمی کوچیک‌تر تا جا باز شه */
+  .topbar-search { max-width: unset; flex: 1; min-width: 0; }
+}
+
 </style>
 </head>
 <body>
@@ -1432,6 +1677,21 @@ input,textarea{font-family:var(--f)}
     </button>
   </div>
 
+  <!-- MOBILE FILTER BAR -->
+  <div id="mobile-filter-bar">
+    <button class="mob-chip on" onclick="mobFilter('all',this)">همه</button>
+    <button class="mob-chip" onclick="mobFilter('gold',this)">طلافروشی</button>
+    <button class="mob-chip" onclick="mobFilter('silver',this)">نقره‌فروشی</button>
+    <button class="mob-chip" onclick="mobFilter('jewelry',this)">جواهرفروشی</button>
+    <button class="mob-chip" onclick="mobFilter('coin',this)">سکه‌فروشی</button>
+  </div>
+
+  <!-- MOBILE BOTTOM CARD -->
+  <div id="mobile-card">
+    <div class="mob-card-handle"></div>
+    <div id="mob-card-list"></div>
+  </div>
+
   <!-- SIDEBAR -->
   <div id="sidebar">
     <div class="sidebar-header">
@@ -1462,10 +1722,6 @@ input,textarea{font-family:var(--f)}
 </div>
 
 <!-- ════ MAP VIEW ════ -->
-<button id="back-to-landing" onclick="showSection('landing')">
-  <span class="material-icons-round">arrow_back</span>
-  صفحه اصلی
-</button>
 
 <!-- ════ LANDING VIEW ════ -->
 <div id="landing-view">
@@ -1474,9 +1730,10 @@ input,textarea{font-family:var(--f)}
   <div class="wrap">
     <span class="nav-logo">عیار</span>
     <ul class="nav-links">
-      <li><a href="#buyers" onclick="document.getElementById('buyers').scrollIntoView({behavior:'smooth'});return false;">برای فروشندگان</a></li>
-      <li><a href="#buyers">برای خریداران</a></li>
-      <li><a href="#faq">سؤالات متداول</a></li>
+      <li class="nav-mob-hide"><a href="#buyers" onclick="document.getElementById('buyers').scrollIntoView({behavior:'smooth'});return false;">برای خریدار و فروشنده</a></li>
+      <li class="nav-mob-hide"><a href="#faq" onclick="document.getElementById('faq').scrollIntoView({behavior:'smooth'});return false;">سؤالات متداول</a></li>
+      <li><a href="#register" onclick="scrollToSection('contact');setTimeout(()=>document.getElementById('register').scrollIntoView({behavior:'smooth',block:'start'}),400);return false;">ثبت طلافروشی</a></li>
+      <li><a href="#support" onclick="scrollToSection('contact');setTimeout(()=>document.getElementById('support').scrollIntoView({behavior:'smooth',block:'start'}),400);return false;">پشتیبانی</a></li>
     </ul>
     <button onclick="showSection('map')" style="height:36px;padding:0 18px;border-radius:8px;background:transparent;color:#D97757;font-family:'Vazirmatn',sans-serif;font-size:14px;font-weight:600;border:1px solid #D97757;cursor:pointer" onmouseover="this.style.background='#FEF3EE'" onmouseout="this.style.background='transparent'">مشاهده نقشه</button>
   </div>
@@ -1587,7 +1844,7 @@ input,textarea{font-family:var(--f)}
         </div>
       </div>
       <div class="tab-cta fade">
-        <a href="#" onclick="showSection('map');return false;" class="btn btn-p" style="text-decoration:none">ثبت طلافروشی</a>
+        <a href="#register" onclick="scrollToSection('contact');setTimeout(()=>document.getElementById('register').scrollIntoView({behavior:'smooth',block:'start'}),400);return false;" class="btn btn-p" style="text-decoration:none">ثبت طلافروشی</a>
       </div>
     </div>
 
@@ -1603,12 +1860,10 @@ input,textarea{font-family:var(--f)}
     </div>
     <div class="faq-list">
       <div class="faq-item fade"><button class="faq-q" onclick="faq(this)"><span>چطور می‌توانم طلافروشی نزدیک خودم را پیدا کنم؟</span><div class="faq-ico"></div></button><div class="faq-ans">با وارد کردن نام محله یا شهر در کادر جستجو، نقشه‌ای از طلافروشی‌های تأیید‌شده آن منطقه نمایش داده می‌شود. می‌توانید بر اساس فاصله یا نوع مغازه فیلتر کنید.</div></div>
-      <div class="faq-item fade"><button class="faq-q" onclick="faq(this)"><span>آیا قیمت‌های نمایش‌داده‌شده واقعی هستند؟</span><div class="faq-ico"></div></button><div class="faq-ans">بله. قیمت‌های طلا در عیار مستقیماً از فروشندگان تأیید‌شده دریافت می‌شود و به‌صورت لحظه‌ای به‌روز می‌گردد. هیچ واسطه‌ای در قیمت‌گذاری دخالت ندارد.</div></div>
       <div class="faq-item fade"><button class="faq-q" onclick="faq(this)"><span>ثبت طلافروشی در عیار رایگان است؟</span><div class="faq-ico"></div></button><div class="faq-ans">بله، ثبت اولیه کاملاً رایگان است. کافی است فرم ثبت را پر کنید تا تیم ما در اسرع وقت با شما تماس بگیرد.</div></div>
       <div class="faq-item fade"><button class="faq-q" onclick="faq(this)"><span>چطور مطمئن شوم که اطلاعات فروشگاه‌ها معتبر است؟</span><div class="faq-ico"></div></button><div class="faq-ans">تمام فروشگاه‌های موجود در عیار پیش از انتشار توسط تیم ما احراز هویت می‌شوند. فروشگاه‌های تأیید‌شده نشان مخصوص دریافت می‌کنند.</div></div>
       <div class="faq-item fade"><button class="faq-q" onclick="faq(this)"><span>آیا امکان تماس مستقیم با فروشنده وجود دارد؟</span><div class="faq-ico"></div></button><div class="faq-ans">بله. با کلیک روی هر فروشگاه در نقشه، شماره تلفن مستقیم آن نمایش داده می‌شود و می‌توانید بدون واسطه تماس بگیرید.</div></div>
-      <div class="faq-item fade"><button class="faq-q" onclick="faq(this)"><span>قیمت طلا در کدام عیار نمایش داده می‌شود؟</span><div class="faq-ico"></div></button><div class="faq-ans">در حال حاضر قیمت طلای ۱۸ عیار نمایش داده می‌شود که رایج‌ترین نوع طلا در بازار ایران است. در نسخه‌های آینده سایر عیارها نیز اضافه خواهند شد.</div></div>
-      <div class="faq-item fade"><button class="faq-q" onclick="faq(this)"><span>آیا عیار در شهرهای دیگر هم فعال است؟</span><div class="faq-ico"></div></button><div class="faq-ans">عیار در حال گسترش به سراسر ایران است. در حال حاضر تهران پوشش کامل دارد و به‌زودی سایر شهرهای بزرگ اضافه می‌شوند.</div></div>
+      <div class="faq-item fade"><button class="faq-q" onclick="faq(this)"><span>آیا عیار در شهرهای دیگر هم فعال است؟</span><div class="faq-ico"></div></button><div class="faq-ans">عیار در حال گسترش به سراسر ایران است. در حال حاضر تهران و مشهد پوشش کامل دارند و به‌زودی سایر شهرهای بزرگ اضافه می‌شوند.</div></div>
       <div class="faq-item fade"><button class="faq-q" onclick="faq(this)"><span>اطلاعات شخصی من در فرم‌ها امن است؟</span><div class="faq-ico"></div></button><div class="faq-ans">اطلاعات شما فقط برای تماس و پشتیبانی استفاده می‌شود و هرگز با اشخاص ثالث به اشتراک گذاشته نمی‌شود.</div></div>
       <div class="faq-item fade"><button class="faq-q" onclick="faq(this)"><span>چطور می‌توانم یک خطا یا اطلاعات اشتباه را گزارش دهم؟</span><div class="faq-ico"></div></button><div class="faq-ans">از طریق فرم «ارتباط با پشتیبانی» در همین صفحه می‌توانید هر مشکل یا خطایی را گزارش دهید. تیم ما در کمترین زمان پیگیری خواهد کرد.</div></div>
     </div>
@@ -1625,52 +1880,54 @@ input,textarea{font-family:var(--f)}
     <div class="lf-grid">
 
       <!-- ارتباط با پشتیبانی -->
-      <div class="lf-card fade">
+      <div class="lf-card fade" id="support">
         <h2 class="lf-card-title">ارتباط با پشتیبانی</h2>
         <div class="lf-fields">
           <div class="lf-fld">
             <label class="lf-label">نام</label>
-            <input class="lf-inp" type="text" placeholder="نام خود را وارد کنید">
+            <input id="sup-name" class="lf-inp" type="text" placeholder="نام خود را وارد کنید" autocomplete="off">
           </div>
           <div class="lf-fld">
             <label class="lf-label">شماره تماس</label>
-            <input class="lf-inp" type="tel" placeholder="شماره تماس" dir="ltr" style="text-align:right">
+            <input id="sup-phone" class="lf-inp" type="tel" placeholder="شماره تماس" dir="ltr" style="text-align:right" autocomplete="off">
           </div>
           <div class="lf-fld">
             <label class="lf-label">متن</label>
-            <textarea class="lf-ta" placeholder="مثال: با مشکل روبرو هستم"></textarea>
+            <textarea id="sup-message" class="lf-ta" placeholder="مثال: با مشکل روبرو هستم" autocomplete="off"></textarea>
           </div>
         </div>
-        <div style="margin-top:16px">
-          <button style="height:36px;padding:0 20px;border-radius:8px;background:transparent;color:#D97757;font-family:'Vazirmatn',sans-serif;font-size:14px;font-weight:600;border:1px solid #D97757;cursor:pointer" onmouseover="this.style.background='#FEF3EE'" onmouseout="this.style.background='transparent'">ارسال</button>
+        <div style="margin-top:16px;display:flex;align-items:center;gap:12px">
+          <button id="sup-btn" onclick="submitSupport()" style="height:36px;padding:0 20px;border-radius:8px;background:transparent;color:#D97757;font-family:'Vazirmatn',sans-serif;font-size:14px;font-weight:600;border:1px solid #D97757;cursor:pointer" onmouseover="this.style.background='#FEF3EE'" onmouseout="this.style.background='transparent'">ارسال</button>
+          <span id="sup-status" style="display:none;font-size:13px;font-family:'Vazirmatn',sans-serif"></span>
         </div>
       </div>
 
       <!-- ثبت طلافروشی -->
-      <div class="lf-card fade" style="transition-delay:.1s">
+      <div class="lf-card fade" id="register" style="transition-delay:.1s">
         <h2 class="lf-card-title">ثبت طلافروشی رایگان</h2>
         <div class="lf-fields">
           <div class="lf-row2">
             <div class="lf-fld">
               <label class="lf-label">نام</label>
-              <input class="lf-inp" type="text" placeholder="نام خود را وارد کنید">
+              <input id="reg-name" class="lf-inp" type="text" placeholder="نام خود را وارد کنید" autocomplete="off">
             </div>
             <div class="lf-fld">
               <label class="lf-label">شماره تماس</label>
-              <input class="lf-inp" type="tel" placeholder="شماره تماس" dir="ltr" style="text-align:right">
+              <input id="reg-phone" class="lf-inp" type="tel" placeholder="شماره تماس" dir="ltr" style="text-align:right" autocomplete="off">
             </div>
           </div>
           <div class="lf-fld">
             <label class="lf-label">آدرس</label>
-            <input class="lf-inp" type="text" placeholder="مثال: آدرس را وارد نمایید">
+            <input id="reg-address" class="lf-inp" type="text" placeholder="مثال: آدرس را وارد نمایید" autocomplete="off">
           </div>
           <div class="lf-fld">
             <label class="lf-label">یادداشت (اختیاری)</label>
-            <textarea class="lf-ta" placeholder="هر توضیح اضافه‌ای اینجا بنویسید"></textarea>
+            <textarea id="reg-note" class="lf-ta" placeholder="هر توضیح اضافه‌ای اینجا بنویسید" autocomplete="off"></textarea>
           </div>
         </div>
-        <div style="margin-top:16px">
-          <button style="height:36px;padding:0 20px;border-radius:8px;background:transparent;color:#D97757;font-family:'Vazirmatn',sans-serif;font-size:14px;font-weight:600;border:1px solid #D97757;cursor:pointer" onmouseover="this.style.background='#FEF3EE'" onmouseout="this.style.background='transparent'">ثبت رایگان</button>
+        <div style="margin-top:16px;display:flex;align-items:center;gap:12px">
+          <button id="reg-btn" onclick="submitRegister()" style="height:36px;padding:0 20px;border-radius:8px;background:transparent;color:#D97757;font-family:'Vazirmatn',sans-serif;font-size:14px;font-weight:600;border:1px solid #D97757;cursor:pointer" onmouseover="this.style.background='#FEF3EE'" onmouseout="this.style.background='transparent'">ثبت رایگان</button>
+          <span id="reg-status" style="display:none;font-size:13px;font-family:'Vazirmatn',sans-serif"></span>
         </div>
       </div>
 
@@ -1765,6 +2022,43 @@ function scrollToSection(id) {
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   }, 100);
 }
+
+function toggleMobMenu() {
+  const drawer = document.getElementById('mob-menu-drawer');
+  drawer.classList.toggle('open');
+}
+function closeMobMenu() {
+  document.getElementById('mob-menu-drawer').classList.remove('open');
+}
+
+/* ─── پاک کردن فرم‌ها با رفرش ─── */
+function clearAllForms() {
+  document.querySelectorAll('input:not([type="button"]):not([type="submit"]):not([type="search"]), textarea')
+    .forEach(el => { el.value = ''; });
+}
+window.addEventListener('pageshow', clearAllForms);
+window.addEventListener('DOMContentLoaded', clearAllForms);
+
+/* ─── drag-to-scroll برای فیلتر دسکتاپ ─── */
+(function() {
+  const el = document.getElementById('filter-carousel');
+  if (!el) return;
+  let isDown = false, startX, scrollLeft;
+  el.addEventListener('mousedown', e => {
+    isDown = true;
+    el.classList.add('dragging');
+    startX = e.pageX - el.offsetLeft;
+    scrollLeft = el.scrollLeft;
+  });
+  el.addEventListener('mouseleave', () => { isDown = false; el.classList.remove('dragging'); });
+  el.addEventListener('mouseup', () => { isDown = false; el.classList.remove('dragging'); });
+  el.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - el.offsetLeft;
+    el.scrollLeft = scrollLeft - (x - startX);
+  });
+})();
 
 /* ════ SECTION MANAGER ════ */
 function goToMap() {
@@ -1946,6 +2240,7 @@ async function fetchShops() {
   markers = {};
   SHOPS.forEach(shop => { if(shop.lat && shop.lng) addMarker(shop); });
   renderSidebar();
+  renderMobCards();
 }
 
 function createMarkerIcon(shop, isActive) {
@@ -2140,9 +2435,8 @@ function locateMe() {
       }).addTo(map);
 
       userMarker.bindPopup(
-        `<div style="font-family:Vazirmatn,sans-serif;font-size:13px;direction:rtl;padding:4px 2px">
-          📍 موقعیت شما<br>
-          <span style="font-size:11px;color:#888">دقت: ${Math.round(acc)} متر</span>
+        `<div style="font-family:Vazirmatn,sans-serif;font-size:13px;direction:rtl;padding:6px 4px;white-space:nowrap">
+          📍 &nbsp;موقعیت شما
         </div>`
       ).openPopup();
 
@@ -2212,21 +2506,20 @@ document.querySelectorAll('.fade').forEach(el=>io.observe(el));
 function startApp() {
   const overlay = document.getElementById('popup-overlay');
   const card = document.getElementById('popup-card');
-  // فوری pointer-events رو غیرفعال کن تا کلیک‌ها کار کنن
   overlay.style.pointerEvents = 'none';
   card.style.animation = 'popupExit 0.3s ease forwards';
   overlay.style.animation = 'overlayExit 0.4s ease 0.15s forwards';
   setTimeout(() => {
     overlay.style.display = 'none';
     overlay.style.pointerEvents = 'auto';
+    document.body.classList.remove('popup-open');
     document.body.classList.add('map-mode');
     showSection('map');
   }, 500);
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  // Show map immediately behind popup
-  document.body.classList.add('map-mode');
+  document.body.classList.add('map-mode', 'popup-open');
   const app = document.getElementById('app');
   app.style.display = 'flex';
   initMap();
@@ -2236,6 +2529,61 @@ window.addEventListener('DOMContentLoaded', () => {
   }, {threshold: 0.1});
   document.querySelectorAll('#landing-view .fade').forEach(el => io.observe(el));
 });
+
+
+/* ═══ MOBILE UI ══════════════════════════════════════════ */
+function isMobile() { return window.innerWidth <= 768; }
+
+function mobFilter(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.mob-chip').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  // sync desktop filter too
+  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  renderMobCards();
+  Object.values(markers).forEach(m => map.removeLayer(m));
+  markers = {};
+  SHOPS.filter(s => (type === 'all' || s.type === type) && s.lat && s.lng).forEach(s => addMarker(s));
+}
+
+function renderMobCards() {
+  if (!isMobile()) return;
+  const list = document.getElementById('mob-card-list');
+  if (!list) return;
+
+  const filtered = SHOPS.filter(s => {
+    const mf = currentFilter === 'all' || s.type === currentFilter;
+    const ms = !searchQuery || s.name.includes(searchQuery) || s.address.includes(searchQuery);
+    return mf && ms;
+  });
+
+  if (!filtered.length) {
+    list.innerHTML = '';
+    return;
+  }
+
+  const TYPE_LABELS = { gold:'طلافروشی', silver:'نقره‌فروشی', jewelry:'جواهرفروشی', coin:'سکه‌فروشی' };
+  const BADGE_COLOR = { gold:'background:#FEF3EE;color:#D97757', silver:'background:#F0F0F8;color:#404060', jewelry:'background:#FFF0F5;color:#900050', coin:'background:#F0F8F0;color:#2A6030' };
+
+  list.innerHTML = filtered.map(s => `
+      <div class="mob-card-item" onclick="mobSelectShop(${s.id})">
+        <div class="mob-card-info">
+          <div class="mob-card-name">${s.name}</div>
+          <span class="mob-card-badge" style="${BADGE_COLOR[s.type]||''}">${TYPE_LABELS[s.type]||''}</span>
+          <div class="mob-card-addr">${s.address}</div>
+          <div class="mob-card-phone">${s.phone}</div>
+        </div>
+      </div>`).join('');
+}
+
+function mobSelectShop(id) {
+  const shop = SHOPS.find(s => s.id === id);
+  if (!shop || !shop.lat || !shop.lng) return;
+  map.setView([shop.lat, shop.lng], 17, { animate: true });
+}
+
+// Re-render mobile cards after fetchShops
+const _origFetchShops = window.fetchShops;
 
 </script>
 </body>
